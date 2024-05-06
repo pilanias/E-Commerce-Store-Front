@@ -33,7 +33,7 @@ export interface Size {
 }
 
 export interface Colour {
-  is: string;
-  sname: string;
+  id: string;
+  name: string;
   value: string;
 }
