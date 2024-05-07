@@ -1,7 +1,5 @@
-'use client';
-
+import { useEffect, Suspense } from 'react';
 import axios from 'axios';
-import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -9,10 +7,9 @@ import Button from '@/components/ui/button';
 import Currency from '@/components/ui/currency';
 import useCart from '@/hooks/use-cart';
 
-const Summary = () => {
+const HandleSearchParams = () => {
   const searchParams = useSearchParams();
-  const items =useCart((state) => state.items);
-  const removeAll = useCart((state) => state.removeAll)
+  const removeAll = useCart((state) => state.removeAll);
 
   useEffect(() => {
     if (searchParams.get('success')) {
@@ -25,9 +22,12 @@ const Summary = () => {
     }
   }, [searchParams, removeAll]);
 
-  const totalPrice = items.reduce((total, item) => {
-    return total + Number(item.price);
-  }, 0)
+  return null; // This component does not render anything
+};
+
+const Summary = () => {
+  const items = useCart((state) => state.items);
+  const totalPrice = items.reduce((total, item) => total + Number(item.price), 0);
 
   const onCheckout = async () => {
     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/checkout`, {
@@ -35,10 +35,13 @@ const Summary = () => {
     });
 
     window.location = response.data.url;
-  }
+  };
 
-  return(
-    <div className='mt- 16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8'>
+  return (
+    <div className='mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8'>
+      <Suspense fallback={<div>Loading...</div>}>
+        <HandleSearchParams />
+      </Suspense>
       <h2 className='text-lg font-medium'>
         Order Summary
       </h2>
@@ -47,7 +50,7 @@ const Summary = () => {
           <div className='text-base font-medium text-gray-900'>
             Order total:
           </div>
-          <Currency value={totalPrice}/>
+          <Currency value={totalPrice} />
         </div>
       </div>
       <Button disabled={items.length === 0} onClick={onCheckout} className='w-full mt-6'>
@@ -55,6 +58,6 @@ const Summary = () => {
       </Button>
     </div>
   );
-}
- 
+};
+
 export default Summary;
